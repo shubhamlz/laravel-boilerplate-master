@@ -3,6 +3,7 @@
 @section('title', __('View User'))
 
 @section('content')
+<a href="{{route('admin.auth.showproduct')}}">List</a>
 <x-forms.post :action="route('admin.auth.storeproduct')" enctype="multipart/form-data">
     <div class="form-group row">
         <label for="productname" class="col-md-3 col-form-label text-md-right">product Name</label>

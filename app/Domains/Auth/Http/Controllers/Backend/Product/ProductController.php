@@ -5,6 +5,7 @@ namespace App\Domains\Auth\Http\Controllers\Backend\Product;
 use App\Domains\Auth\Http\Requests\Backend\Product\StoreProductRequest;
 use App\Domains\Auth\Services\ProductService;
 use App\Domains\Auth\Models\Category;
+use App\Domains\Auth\Models\Product;
 
 // use Illuminate\Http\Request;
 
@@ -24,7 +25,15 @@ class ProductController
     }
     
     public function store(StoreProductRequest $request){
-        $this->productService->store($request->validated());
+        $product =  $this->productService->store($request->validated());
+        
+        return redirect()->route('admin.auth.create', $product)->withFlashSuccess(__('The product was successfully added.'));
        
+    }
+    public function show(Product $product){
+
+        dd($product);
+        // return view('backend.auth.user.show')
+        // ->withUser($product);
     }
 }
