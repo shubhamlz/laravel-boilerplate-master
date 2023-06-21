@@ -21,6 +21,7 @@ class CreateOrdersTable extends Migration
             $table->unsignedDecimal('total_amount',8,2);
             $table->string('payment_status');
             $table->string('status');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

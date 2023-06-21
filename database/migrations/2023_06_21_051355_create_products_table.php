@@ -21,6 +21,7 @@ class CreateProductsTable extends Migration
             $table->integer("inStock")->default(1);
             $table->string("image");
             $table->string('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

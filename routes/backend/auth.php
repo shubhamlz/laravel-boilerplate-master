@@ -152,10 +152,11 @@ Route::group([
     ], function () {
         Route::get('product/',[ProductController::class,'create'])->name('create');
         Route::post('product/store',[ProductController::class,'store'])->name('storeproduct');   
-        Route::get('product/show',[ProductController::class,'show'])->name('showproduct');    
-        // Route::get('product/edit/{id}',[TeamController::class,'edit'])->name('edit');  
-        // Route::patch('product/update',[TeamController::class,'update'])->name('tupdate');
-        // Route::delete('product/delete/{id}', [TeamController::class, 'destroy'])->name('remove');  
+        Route::get('product/index',[ProductController::class,'index'])->name('showproducts');
+        Route::get('product/show',[ProductController::class,'show'])->name('showproduct');   
+        Route::get('product/edit/{id}',[ProductController::class,'edit'])->name('productedit');  
+        Route::patch('product/update',[ProductController::class,'update'])->name('productupdate');
+        Route::delete('product/delete/{id}', [ProductController::class, 'destroy'])->name('productremove');  
     });
 
 });

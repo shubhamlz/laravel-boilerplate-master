@@ -7,7 +7,6 @@ use App\Exceptions\GeneralException;
 use App\Services\BaseService;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -73,6 +72,7 @@ class ProductService extends BaseService
     public function update(Product $Product, array $data = [], $tdata): Product
     {
         $old_image = $tdata->get('old_image');
+    //    dd($data);
         DB::beginTransaction();
         $image = isset($data['image']) && !empty($data['image']) ? $data['image'] : $old_image;
         if (isset($data['image']) && !empty($data['image'])) {
@@ -100,11 +100,12 @@ class ProductService extends BaseService
             ];
 
             // Update the Product
-            
+            // dd( $tdata->get('id'));
             $this->updateProduct($ProductData, $tdata->get('id'));
             // TODO: Handle Product roles and permissions here
             DB::commit();
         } catch (Exception $e) {
+            dd($e);
             DB::rollBack();
 
             throw new GeneralException(__('There was a problem updating this Product. Please try again.'));
@@ -131,13 +132,12 @@ class ProductService extends BaseService
     {   
         $Product = $this->model->where('id', $id)->firstOrFail();
         $Product->update([
-            'img' => $data['image'],
+            'image' =>$data['image'],
             'name' => $data['name'],
-            'email' => $data['email'],
-            'mobile' => $data['mobile'],
-            'available_from' => isset($data['available_from']) && $data['available_from'] != "" ? $data['available_from'] : now(),
-            'designation' => $data['designation'],
-            'available_till' => date('Y-m-d H:i:s', strtotime($data['available_from'] . ' + 2 hours')),
+            'price' => $data['price'],
+            'inStock' => $data['inStock'],
+            'category_id' =>$data['category_id'],
+            'description' => $data['description'],
         ]);
 
         return $Product;

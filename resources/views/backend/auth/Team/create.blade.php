@@ -32,9 +32,9 @@
         <div class="col-md-9">
             <select name="category_id" required  id="categogry_id">
                 <option value="" selected> Please select Designation</option>
-                @foreach($category as $cat)
-                <option value="{{$cat->id}}">{{$cat->name}}</option>
-                @endforeach
+              
+                <option value="1">Editor</option>
+                <option value="2">Author</option>
             </select>
         </div>
     </div>
