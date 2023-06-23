@@ -16,10 +16,4 @@ trait UserRelationship
     {
         return $this->morphMany(PasswordHistory::class, 'model');
     }
-    public function cart(){
-        return $this->hasOne(Cart::class,'model');
-    }
-    public function order(){
-        return $this->hasMany(Order::class,'model');
-    }
 }

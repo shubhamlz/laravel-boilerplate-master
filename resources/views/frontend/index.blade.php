@@ -94,11 +94,61 @@
                 <div class="title m-b-md">
                     <example-component></example-component>
                 </div><!--title-->
+                <div class='temp-content'>
 
-                <div class="links">
+                <ul class="nav justify-content-center">
+                    @foreach($category as $key => $value)
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="">{{$value}}</a>
+                    </li>
+                    @endforeach
+                    <!-- <li class="nav-item">
+                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                    </li> -->
+                </ul>
+                    @foreach($product as $prod)
+                    <div class="card" style="width: 16rem;">
+                        <img src="{{ asset('storage/images/'.$prod->image) }}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 class="card-title">{{$prod->name}}</h5>
+                            <p class="card-text">{{$prod->description}} and Its Category is {{$prod->category->cat_name}}</p>
+                            
+                          <span> <strong>inStock:</strong>{{$prod->inStock}} &nbsp; | &nbsp; <strong>Price:</strong>{{$prod->price}}</span>
+                        </div>
+                      
+                        </ul>
+                        <div class="card-body">
+                            <a href="{{ route('frontend.auth.porder', $prod->id) }}" class="card-link" onclick="event.preventDefault(); document.getElementById('place-order-{{$prod->id}}').submit(); ">Place Order</a>
+                            <form id="place-order-{{ $prod->id }}" action="{{ route('frontend.auth.porder', $prod->id) }}" method="POST" style="display: none;">
+                                @csrf
+                                @method('POST')
+                                <input type="hidden" name="product" value="{{ $prod->id }}">
+                            </form>
+
+                            @foreach($userCart as $ascart)
+                            @if($ascart->cart->product_id === $prod->id)
+                              <a href="{{route('frontend.user.dashboard')}}" class="form-control">Go To Cart</a>
+                            
+                            
+                           @else
+                            <a href="{{ route('frontend.auth.pcart', $prod->id) }}" class="card-link" onclick="event.preventDefault(); document.getElementById('add-cart-{{$prod->id}}').submit(); ">Add To Cart</a>
+                            <form id="add-cart-{{ $prod->id }}" action="{{ route('frontend.auth.pcart', $prod->id) }}" method="POST" style="display: none;">
+                                @csrf
+                                @method('POST')
+                                <input type="hidden" name="product" value="{{ $prod->id }}">
+                            </form>
+                            @endif
+                            @endforeach
+                        </div>
+                        </div>
+                    @endforeach
+                </div>
+                <!-- <div class="links">
                     <a href="http://laravel-boilerplate.com" target="_blank"><i class="fa fa-book"></i> @lang('Docs')</a>
                     <a href="https://github.com/rappasoft/laravel-boilerplate" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-                </div><!--links-->
+                </div> -->
+                
+                <!--links-->
             </div><!--content-->
         </div><!--app-->
 

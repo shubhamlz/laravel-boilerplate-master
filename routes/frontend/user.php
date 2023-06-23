@@ -4,7 +4,8 @@ use App\Http\Controllers\Frontend\User\AccountController;
 use App\Http\Controllers\Frontend\User\DashboardController;
 use App\Http\Controllers\Frontend\User\ProfileController;
 use Tabuna\Breadcrumbs\Trail;
-
+use App\Domains\Auth\Http\Controllers\Frontend\Auth\CartController;
+use App\Domains\Auth\Http\Controllers\Frontend\Auth\OrderController;
 /*
  * These frontend controllers require the user to be logged in
  * All route names are prefixed with 'frontend.'
@@ -25,6 +26,6 @@ Route::group(['as' => 'user.', 'middleware' => ['auth', 'password.expires', conf
             $trail->parent('frontend.index')
                 ->push(__('My Account'), route('frontend.user.account'));
         });
-
+  
     Route::patch('profile/update', [ProfileController::class, 'update'])->name('profile.update');
 });

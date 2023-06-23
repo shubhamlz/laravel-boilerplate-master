@@ -12,7 +12,6 @@
 
     <div class="form-group row">
         <label for="issue" class="col-md-3 col-form-label text-md-right">Issue</label>
-
         <div class="col-md-9">
             <input type="text" name="password" class="form-control" placeholder="Your issues" />
         </div>

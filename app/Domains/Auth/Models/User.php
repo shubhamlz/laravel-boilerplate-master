@@ -160,4 +160,11 @@ class User extends Authenticatable implements MustVerifyEmail, TwoFactorAuthenti
     {
         return UserFactory::new();
     }
+
+    public function cart(){
+        return $this->hasOne(Cart::class);
+    }
+    public function order(){
+        return $this->hasMany(Order::class,'model');
+    }
 }

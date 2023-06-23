@@ -12,6 +12,8 @@ use App\Domains\Auth\Http\Controllers\Frontend\Auth\TwoFactorAuthenticationContr
 use App\Domains\Auth\Http\Controllers\Frontend\Auth\UpdatePasswordController;
 use App\Domains\Auth\Http\Controllers\Frontend\Auth\VerificationController;
 use App\Domains\Auth\Http\Controllers\Frontend\Auth\AppointmentController;
+use App\Domains\Auth\Http\Controllers\Frontend\Auth\OrderController;
+use App\Domains\Auth\Http\Controllers\Frontend\Auth\CartController;
 
 use Tabuna\Breadcrumbs\Trail;
 
@@ -20,9 +22,12 @@ use Tabuna\Breadcrumbs\Trail;
  * All route names are prefixed with 'frontend.auth'.
  */
 Route::group(['as' => 'auth.'], function () {
-    Route::group(['middleware' => 'auth'], function () {
+    Route::group(['middleware' => 'auth'], function () { 
         // Authentication
+        Route::post('placeorder/{id}',[OrderController::class,'create'])->name('porder');  
+        Route::post('addtocart',[CartController::class,'create'])->name('pcart');  
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+        Route::patch('updatecart',[CartController::class,'update'])->name('updatecart');
 
         //Appointment form 
         Route::get('appointment',[AppointmentController::class,'index'])->name('appointment');
