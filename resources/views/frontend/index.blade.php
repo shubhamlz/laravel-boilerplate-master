@@ -94,6 +94,8 @@
                 <div class="title m-b-md">
                     <example-component></example-component>
                 </div><!--title-->
+                @auth
+                    @if ($logged_in_user->isUser())
                 <div class='temp-content'>
 
                 <ul class="nav justify-content-center">
@@ -126,6 +128,8 @@
                             </form>
 
                             @foreach($userCart as $ascart)
+                         
+                            @if(!empty($ascart->cart))
                             @if($ascart->cart->product_id === $prod->id)
                               <a href="{{route('frontend.user.dashboard')}}" class="form-control">Go To Cart</a>
                             
@@ -138,11 +142,21 @@
                                 <input type="hidden" name="product" value="{{ $prod->id }}">
                             </form>
                             @endif
+                            @else
+                            <a href="{{ route('frontend.auth.pcart', $prod->id) }}" class="card-link" onclick="event.preventDefault(); document.getElementById('add-cart-{{$prod->id}}').submit(); ">Add To Cart</a>
+                            <form id="add-cart-{{ $prod->id }}" action="{{ route('frontend.auth.pcart', $prod->id) }}" method="POST" style="display: none;">
+                                @csrf
+                                @method('POST')
+                                <input type="hidden" name="product" value="{{ $prod->id }}">
+                            </form>
+                            @endif
                             @endforeach
                         </div>
                         </div>
                     @endforeach
                 </div>
+                @endif
+                @endauth
                 <!-- <div class="links">
                     <a href="http://laravel-boilerplate.com" target="_blank"><i class="fa fa-book"></i> @lang('Docs')</a>
                     <a href="https://github.com/rappasoft/laravel-boilerplate" target="_blank"><i class="fab fa-github"></i> GitHub</a>

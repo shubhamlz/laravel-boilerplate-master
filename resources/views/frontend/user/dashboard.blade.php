@@ -23,63 +23,103 @@
                                     <tr>
                                         <th>Product Name</th>
                                         <th class="text-center">Quantity</th>
+                                        <th class="text-center">Per head amount</th>
                                         <th class="text-center">Subtotal</th>
-                                        <th class="text-center"><a class="btn btn-sm btn-outline-danger" href="#">Clear Cart</a></th>
+                                        <th class="text-center">
+                                    
+                                        <a class="remove-cart" href="{{ route('frontend.auth.removeitem', Auth::user()->id) }}" data-toggle="tooltip" title="" data-original-title="Clear user Cart" onclick="event.preventDefault(); if (confirm('Are you sure you want to delete this row?')) document.getElementById('remove-user-{{ Auth::user()->id}}').submit();">
+                                        Clear Cart
+                                            </a>
+                                            <form id="remove-user-{{ Auth::user()->id }}" action="{{ route('frontend.auth.removecart',  Auth::user()->id) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                    
+                                    </th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @php
-                                     $total=0;
-                                     @endphp
-                                    @foreach($userCart as $cart)
-                                   
-                                      @foreach($userProduct as $productInfo)
-                                        @if($cart->cart->product_id == $productInfo->id)
-                                        @php
-                                        $instock = $productInfo->inStock;
-                                       
-                                        $amount = $cart->cart->quantity * $productInfo->price;
-                                            $image = $productInfo->image;
-                                            $proname =$productInfo->name;
-                                            $total+=$amount;
-                                            @endphp
-                                         @endif
-                                      @endforeach
 
+                                <tbody>
+                                @php
+                              
+                               
+                                if(!empty($userCart)){
+                                  $total = 0;
+                                @endphp       
+                                @foreach($userCart as $cart)
+                                @php
+                                 
+                                 foreach($userProduct as $productInfo){
+                                       if($cart->product_id == $productInfo->id){
+                                                $instock = $productInfo->inStock;
+                                                $amount = $cart->quantity * $productInfo->price;
+                                                $image = $productInfo->image;
+                                                $proname = $productInfo->name;
+                                                $total+= $amount;
+                                           
+                                  
+                                @endphp
                                     <tr>
                                         <td>
                                             <div class="product-item">
                                                 <a class="product-thumb" href="#"><img src="{{asset('storage/images/'.$image)}}" width="140px" alt="Product"></a>
                                                 <div class="product-info">
-                                                    <h4 class="product-title"><a href="#">{{$proname}}</a></h4><span><em>Size:</em> 10.5</span><span><em>Color:</em> Dark Blue</span>
+                                                    <h4 class="product-title"><a href="#">{{$proname}}</a></h4>
+                                                    <span><em>Size:</em> 10.5</span>
+                                                    <span><em>Color:</em> Dark Blue</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="text-center ">
+                                        <td class="text-center">
                                             <div class="count-input d-flex">
-                                                 <span class="sub btn" id = "sub-{{$cart->cart->id}}">-</span>
-                                                <input type="number" readonly class="form-control quantity text-center" min="0" max="{{$instock}}" value="{{$cart->cart->quantity}}" >
-                                                <span class="add btn" id = "add-{{$cart->cart->id}}" >+</span>
+                                                <span class="sub btn" id="sub-{{$cart->id}}">-</span>
+                                                <input type="number" readonly id="quantity-{{$cart->id}}" class="form-control  text-center" min="0" max="{{$instock}}" value="{{$cart->quantity}}">
+                                                <span class="add btn" id="add-{{$cart->id}}">+</span>
                                             </div>
                                         </td>
-                                        <td class="text-center text-lg text-medium" id="amount-{{$cart->cart->id}}">{{$amount}}</td>
-                                        <td class="text-center"><a class="remove-from-cart" href="#" data-toggle="tooltip" title="" data-original-title="Remove item"><i class="fa fa-trash"></i></a></td>
+                                        <td clas="perhead-{{$cart->id}}">{{$productInfo->price}}</td>
+                                        <td class="text-center text-lg text-medium" id="amount-{{$cart->id}}">{{$amount}}</td>
+                                        <td class="text-center">
+                                            <a class="remove-from-cart" href="{{ route('frontend.auth.removeitem', $cart->id) }}" data-toggle="tooltip" title="" data-original-title="Remove item" onclick="event.preventDefault(); if (confirm('Are you sure you want to delete this row?')) document.getElementById('delete-form-{{$cart->id}}').submit();">
+                                                <i class="fa fa-trash"></i>
+                                            </a>
+                                            <form id="delete-form-{{ $cart->id }}" action="{{ route('frontend.auth.removeitem', $cart->id) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <input type="hidden" name="cart-id" value="{{$cart->id}}">
+                                            </form>
+                                        </td>
                                     </tr>
-                                    @endforeach
-                                </tbody>
+                                    @php
+                                    }
+                                }
+                               @endphp
+                                @endforeach
+                                @php
+                                    }
+                               @endphp
+                                @if (empty($userCart->cart))
+                                    <tr>
+                                        <td colspan="12">
+                                            <p class="text-center">Please Add Product To Your Cart</p>
+                                        </td>
+                                    </tr>
+                                @endif
+                            </tbody>
                             </table>
+
                         </div>
                         <div class="shopping-cart-footer row">
-                            <div class ="col-12">
-                                  <div class="column text-right">Subtotal: <span class="text-medium" >{{$total}}</span></div>
+                            <div class="col-12">
+                                <div class="column text-right">Subtotal: <span class="text-medium" id="total">{{$total}}</span></div>
                             </div>
                             <div class="col-4">
-                               
-                                    <a class="btn btn-outline-secondary" href="{{route('frontend.index')}}"><i class="icon-arrow-left"></i>&nbsp;Back to Shopping</a>
-                                
+
+                                <a class="btn btn-outline-secondary" href="{{route('frontend.index')}}"><i class="icon-arrow-left"></i>&nbsp;Back to Shopping</a>
+
                             </div>
                             <div class="col-8">
-                                 <div class="column text-right"><a class="btn btn-primary" href="#" data-toast="" data-toast-type="success" data-toast-position="topRight" data-toast-icon="icon-circle-check" data-toast-title="Your cart" data-toast-message="is updated successfully!">Update Cart</a>&nbsp; &nbsp;<a class="btn btn-success" href="#">Checkout</a></div>
+                                <div class="column text-right">&nbsp; &nbsp;<a class="btn btn-success" href="#">Checkout</a></div>
                             </div>
                         </div>
                     </div>
@@ -90,46 +130,74 @@
 </div><!--container-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-    $(document).ready(function(){
-        $(".add").click(function(){
+    $(document).ready(function() {
+        $(".add").click(function() {
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             var cartid = $(this).attr('id');
-            var max = $('.quantity').attr('max');
-            cartid = cartid.split('-')
-            // alert(cartid[1]);
-            var qu= $('.quantity').val();
-                qu=qu*1+1
-                if(max>=qu){
-                    $('.quantity').val(qu);
-                    $data={"quantity":qu,'id': cartid[1], _token: csrfToken}; 
-                      updateCart($data,"patch");     
-                }
-              
-               
-        });
-        $(".sub").click(function(){
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
-            var cartid = $(this).attr('id');
-            var min = $('.quantity').attr('min');
-            cartid = cartid.split('-')
-            var qu= $('.quantity').val();
-                qu=qu*1-1
-                if(min<qu){
-                    $('.quantity').val(qu);
-                     $data={"quantity":qu,'id': cartid[1], _token: csrfToken}; 
-                      updateCart($data,"patch"); 
-                }      
-        });
-        function updateCart($data=[],$method){
-          $.ajax({
-            type:$method,
-            url:"{{route('frontend.auth.updatecart')}}",
-            data:$data,
-            success:function(result){
-                $data=JSON.parse(result);
-               $('#amount-'+$data['id']).text($data['total']);
+    
+            cartid = cartid.split('-');
+            var max = $('#quantity-'+cartid[1]).attr('max');
+
+            alert(cartid[1]+max);
+            var qu = $('#quantity-'+cartid[1]).val();
+          
+            qu = qu * 1 + 1;
+            
+            if (max >= qu) {
+                $('#quantity-'+cartid[1]).val(qu);
+                $data = {
+                    "quantity": qu,
+                    'id': cartid[1],
+                    'type':"add",
+                    _token: csrfToken
+                };
+                updateCart($data, "patch");
             }
-          });  
+
+
+        });
+        $(".sub").click(function() {
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            var cartid = $(this).attr('id');
+            var min = $('#quantity-'+cartid[1]).attr('min');
+            cartid = cartid.split('-');
+            var qu = $('#quantity-'+cartid[1]).val();
+            qu = qu * 1 - 1
+            if (min < qu) {
+                $('#quantity-'+cartid[1]).val(qu);
+                $data = {
+                    "quantity": qu,
+                    'id': cartid[1],
+                    'type':"sub",
+                    _token: csrfToken
+                };
+                updateCart($data, "patch");
+            }
+        });
+
+        function updateCart($data = [], $method) {
+            $.ajax({
+                type: $method,
+                url: "{{route('frontend.auth.updatecart')}}",
+                data: $data,
+                success: function(result) {
+                    $data = JSON.parse(result);
+                    $('#amount-' + $data['id']).text($data['total']);
+                    $total= $('#total').text()*1;
+                    $diff =0;
+                    if($data['type']=="add"){
+                        var diff = $data['total']-$total;  
+                        alert($total+"++++"+$data['total']+""+$d);
+                        $total+= $diff;
+                    }else{
+                        var diff=$total-$data['total'];  
+                        $total-= $diff;
+                    }
+                   
+                    // alert($diff );
+                    $('#total').text($total);
+                }
+            });
         }
     });
 </script>

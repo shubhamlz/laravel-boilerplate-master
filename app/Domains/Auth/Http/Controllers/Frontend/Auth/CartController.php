@@ -3,6 +3,7 @@
 namespace App\Domains\Auth\Http\Controllers\Frontend\Auth;
 use App\Domains\Auth\Http\Requests\Frontend\Cart\StoreCartRequest;
 use App\Domains\Auth\Http\Requests\Frontend\Cart\UpdateCartRequest;
+use App\Domains\Auth\Http\Requests\Frontend\Cart\DeleteCartRequest;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Models\Cart;
 use App\Domains\Auth\Models\Category;
@@ -39,7 +40,7 @@ class CartController
     public function create(StoreCartRequest $request)
     {
         // echo Auth::user()->name;
-        
+      
          $this->cartService->store($request->all());
         //  $product =Product::with('category')->get();
         //  $category =Category::pluck('cat_name','id')->all();
@@ -63,6 +64,7 @@ class CartController
     public function update(UpdateCartRequest $request)
     {
         $id = $request->id;
+        $type =$request->type;
         $quantity =$request->quantity;
 
        $userCart = $this->cartService->update($request->validated());
@@ -71,7 +73,9 @@ class CartController
        $userCart = Cart::Where('id',$id)->get()->toArray();
     //    dd($userCart[0]['product_id']);
        $userProduct = Product::with('cart')->Where('id',$userCart[0]['product_id'])->get()->toArray();
-       $data=['total'=> $userProduct[0]['price']* $quantity,'id'=>$id];
+
+       $data=['total'=> $userProduct[0]['price']* $quantity,'id'=>$id,'type'=>$type];
+       
        return json_encode($data); die();
        //return view('frontend.user.dashboard',compact('userProduct','userCart'));
     }
@@ -83,10 +87,17 @@ class CartController
     //  *
     //  * @throws \App\Exceptions\GeneralException
     //  */
-    // public function destroy(DeleteUserRequest $request, User $user)
-    // {
-    //     $this->userService->delete($user);
+    public function destroy(DeleteCartRequest $request, Cart $cart)
+    {
+        $id= $request->id;
+        $this->cartService->destroy($cart,$id);
 
-    //     return redirect()->route('admin.auth.user.deleted')->withFlashSuccess(__('The user was successfully deleted.'));
-    // }
+        return redirect()->route('frontend.user.dashboard')->withFlashSuccess(__('Item was successfully deleted.'));
+    }
+    public function removeCart(DeleteCartRequest $request, Cart $cart){
+        $id= $request->userid;
+          $this->cartService->deleteCart($cart,$id);
+
+        return redirect()->route('frontend.user.dashboard')->withFlashSuccess(__('Item was successfully deleted.'));
+    }
 }

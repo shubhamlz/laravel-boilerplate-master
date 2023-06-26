@@ -17,14 +17,22 @@ class DashboardController
     public function index()
     {
         $user =Auth::user()->id;
-        $userCart = User::with('cart')->Where('id',$user)->get();
+        $userCart = Cart::where('user_id',$user)->get();
         // dd($userCart);
         $productid=[];
         foreach($userCart as $cartid){
-            $productid=$cartid->cart->product_id;
+           
+                $productid[]=$cartid->product_id;
+         
         }
-        $userProduct = Product::with('cart')->Where('id',$productid)->get();
-        // dd($userProduct);
+        // dd($productid);
+        if(!empty($userCart) && !empty($productid)){
+            $userProduct = Product::with('cart')->whereIn('id',$productid)->get();
+        }else{
+            $userProduct =[];
+        }
+       
+        // dd($productid);
         return view('frontend.user.dashboard',compact('userProduct','userCart'));
     }
 }

@@ -27,21 +27,21 @@ class CartService extends BaseService
             $existingCarts = Cart::all();
             $product =Product::findorfail($data['product']);
             
-            if (!empty($existingCarts)) {
-                foreach ($existingCarts as $cart) {
-                    if ($cart['user_id'] == Auth::user()->id && $cart['product_id'] == $data['product'] && $cart['quantity'] < $product->inStock) {
-                        $cartUpdateData = ['quantity' => $cart['quantity']+1,'updated_at'=>carbon::now()];
-                        $this->updateCart($cartUpdateData, $cart['id']);
-                    }
-                }
-            }else{
+            // if (!empty($existingCarts)) {
+            //     foreach ($existingCarts as $cart) {
+            //         if ($cart['user_id'] == Auth::user()->id && $cart['product_id'] == $data['product'] && $cart['quantity'] < $product->inStock) {
+            //             $cartUpdateData = ['quantity' => $cart['quantity']+1,'updated_at'=>carbon::now()];
+            //             $this->updateCart($cartUpdateData, $cart['id']);
+            //         }
+            //     }
+            // }else{
                 $cart = $this->createCart([
                     'user_id' => Auth::user()->id,
                     'product_id' => $data['product'],
                     'date_added' => Carbon::now(),
                     'quantity' => 1,
                 ]);
-            }
+            // }
 
            
 
@@ -91,5 +91,23 @@ class CartService extends BaseService
             'date_added' => $data['date_added'],
             'quantity' => $data['quantity'],
         ]);
+    }
+
+    public function destroy(Cart $cart,$id): bool
+    {
+        $deleted = $cart->findOrFail($id)->forceDelete();
+        if ($deleted) {
+            return true;;
+        }
+    
+        throw new GeneralException(__('There was a problem deleting the item from the cart. Please try again.'));
+    }
+    public function deleteCart(Cart $cart,$id){
+        $cart = $cart::where('user_id',$id);
+        if(!empty($cart)){
+            $cart->forceDelete();
+            return true;
+        }
+        throw new GeneralException(__('There was a problem deleting the item from the cart. Please try again.'));
     }
 }

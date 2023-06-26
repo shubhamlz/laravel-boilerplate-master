@@ -28,6 +28,9 @@ Route::group(['as' => 'auth.'], function () {
         Route::post('addtocart',[CartController::class,'create'])->name('pcart');  
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
         Route::patch('updatecart',[CartController::class,'update'])->name('updatecart');
+        Route::delete('removeitem/{id}',[CartController::class,'destroy'])->name('removeitem');
+        Route::delete('removecart/{userid}',[CartController::class,'removecart'])->name('removecart');
+
 
         //Appointment form 
         Route::get('appointment',[AppointmentController::class,'index'])->name('appointment');

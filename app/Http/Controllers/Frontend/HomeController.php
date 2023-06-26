@@ -17,11 +17,16 @@ class HomeController
      */
     public function index()
     {
-        $product = Product::with('category')->get();
-        $category = Category::pluck('cat_name','id');
-        $userid = Auth::user()->id;
-        $userCart = User::with('cart')->where('id',$userid)->get();
-        // dd($userCart);
-        return view('frontend.index',compact('product','category','userCart'));
+        if(Auth::user()){
+            
+            $userid = Auth::user()->id;
+            $product = Product::with('category')->get();
+            $category = Category::pluck('cat_name','id');
+            $userCart = User::with('cart')->where('id',$userid)->get();
+            return view('frontend.index',compact('product','category','userCart'));
+        }else{
+            return view('frontend.index');
+        }
+    
     }
 }
