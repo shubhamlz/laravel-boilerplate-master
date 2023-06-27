@@ -3,20 +3,24 @@
 namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\Models\Order;
+use App\Domains\Auth\Models\Cart;
+use App\Domains\Auth\Models\Product;
 use App\Exceptions\GeneralException;
 use App\Services\BaseService;
+use Carbon\Carbon;
 use Exception;
+use GrahamCampbell\ResultType\Success;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Class TeamService.
+ * Class orderService.
  */
 class OrderService extends BaseService
 {
     /**
-     * TeamService constructor.
+     * orderService constructor.
      *
      * @param  Order  $order
      */
@@ -32,129 +36,121 @@ class OrderService extends BaseService
      * @throws GeneralException
      * @throws \Throwable
      */
-    public function store(array $data = []): Order
+    public function store(array $data = [],$cart): Order
     {
-
+        
         DB::beginTransaction();
-        $image = $data['image'];
-        $imagename = time() . '.' . $image->getClientoriginalExtension();
-
-        $path = Storage::disk('public')->putFileAs('images', $image, $imagename);
+       
         try {
-            $team = $this->createTeam([
-                'img' => $imagename,
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'mobile' => $data['mobile'],
-                'available_from' => isset($data['available_from']) && $data['available_from'] != "" ? $data['available_from'] : now(),
-                'designation' => $data['designation'],
-                'available_till' => date('Y-m-d H:i:s', strtotime($data['available_from'] . ' + 2 hours')),
+         foreach($cart as $item){
+          $transactionLevel = DB::transactionLevel();
+            $product=Product::where('id',$item['product_id'])->get()->toArray();
+            // dd($product[0]['inStock']);
+            $cartquant=$item['quantity'];
+            if($product[0]['inStock']>=$cartquant){
+                 $amount = $cartquant*$product[0]['price'];
+            }
+        
+            $order = $this->createOrder([
+                'user_id' => $item['user_id'],
+                'product_id' => $item['product_id'],
+                'payment_status' => "process",              
+                'total_amount' =>$amount,
+                'order_date' => Carbon::now(),
+                "created_at" => Carbon::now(),
+                "updated_at" => Carbon::now(),
+                "status" =>"active",
             ]);
-            // dd($team);
-            // TODO: Handle team roles and permissions here
-
+            if($transactionLevel>0){
+                Cart::where('id',$item['id'])->delete();
+              }
+            }
+            
         } catch (Exception $e) {
+            dd($e);
             DB::rollBack();
-            throw new GeneralException(__('There was a problem creating this team. Please try again.'));
+            throw new GeneralException(__('There was a problem creating this order. Please try again.'));
         }
 
         DB::commit();
-
-        return $team;
+       
+        return $order;
     }
 
     /**
-     * @param  Team  $team
+     * @param  Order  $order
      * @param  array  $data
-     * @return Team
+     * @return Order
      *
      * @throws \Throwable
      */
-    public function update(Team $team, array $data = [], $tdata): Team
+    public function update(Order $order, array $data = [], $tdata): Order
     {
-        $old_image = $tdata->get('old_image');
         DB::beginTransaction();
-        $image = isset($data['image']) && !empty($data['image']) ? $data['image'] : $old_image;
-        if (isset($data['image']) && !empty($data['image'])) {
-            if (!empty($old_image)) {
-                if (Storage::disk('public')->exists('images/' . $old_image)) {
-                    Storage::disk('public')->delete('images/' . $old_image);
-                }
-            }
-            $imagename = time() . '.' . $image->getClientoriginalExtension();
-            $path = Storage::disk('public')->putFileAs('images', $image, $imagename);
-        } else {
-            $imagename = $image;
-
-            // echo $image;die();
-        }
-
         try {
-            $teamData = [
-                'img' => $imagename,
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'mobile' => $data['mobile'],
-                'available_from' => isset($data['available_from']) && $data['available_from'] != "" ? $data['available_from'] : now(),
-                'designation' => $data['designation'],
-                'available_till' => date('Y-m-d H:i:s', strtotime($data['available_from'] . ' + 2 hours')),
+            $orderData = [
+                'user_id' =>        $data['user_id'],
+                'product_id' =>     $data['product_id'],
+                'payment_status' => $data['payment_status'],              
+                'total_amount' =>   $data['total_amount'],
+                'order_date' =>     $data['order_date'],
+                "created_at" =>     $data['created_at'],
+                "status" =>         $data['status'],
             ];
 
-            // Update the team
+            // Update the order
             
-            $this->updateTeam($teamData, $tdata->get('id'));
-            // TODO: Handle team roles and permissions here
+            $order = $this->update($orderData, $tdata->get('id'));
+            // TODO: Handle order roles and permissions here
             DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
 
-            throw new GeneralException(__('There was a problem updating this team. Please try again.'));
+            throw new GeneralException(__('There was a problem updating this order. Please try again.'));
         }
 
 
 
-        return $team;
+        return $order;
     }
 
     /**
      * @param  array  $data
-     * @return Team
+     * @return order
      */
     /**
      * @param  array  $data
-     * @return Team
+     * @return order
      */
     /**
      * @param  array  $data
-     * @return Team
+     * @return order
      */
-    protected function updateTeam(array $data = [], $id): Team
+    protected function updateOrder(array $data = [], $id): Order
     {   
-        $team = $this->model->where('id', $id)->firstOrFail();
-        $team->update([
-            'img' => $data['img'],
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'mobile' => $data['mobile'],
-            'available_from' => isset($data['available_from']) && $data['available_from'] != "" ? $data['available_from'] : now(),
-            'designation' => $data['designation'],
-            'available_till' => date('Y-m-d H:i:s', strtotime($data['available_from'] . ' + 2 hours')),
+        $order = $this->model->where('id', $id)->firstOrFail();
+        $order->update([
+            'user_id' =>        $data['user_id'],
+            'product_id' =>     $data['product_id'],
+            'payment_status' => $data['payment_status'],              
+            'total_amount' =>   $data['total_amount'],
+            'order_date' =>     $data['order_date'],
+            "created_at" =>     $data['created_at'],
+            "status" =>         $data['status'],
         ]);
 
-        return $team;
+        return $order;
     }
-
-
-    protected function createTeam(array $data = []): Team
+    protected function createOrder(array $data = []): Order
     {
         return $this->model::create([
-            'name' => $data['name'],
-            'img' => $data['img'],
-            'email' => $data['email'],
-            'mobile' => $data['mobile'],
-            'available_from' => isset($data['available_from']) && $data['available_from'] != "" ? $data['available_from'] : now(),
-            'designation' => $data['designation'],
-            'available_till' => date('Y-m-d H:i:s', strtotime($data['available_from'] . ' + 2 hours')),
+            'user_id' =>        $data['user_id'],
+            'product_id' =>     $data['product_id'],
+            'payment_status' => $data['payment_status'],              
+            'total_amount' =>   $data['total_amount'],
+            'order_date' =>     $data['order_date'],
+            "created_at" =>     $data['created_at'],
+            "status" =>         $data['status'],
         ]);
     }
 }

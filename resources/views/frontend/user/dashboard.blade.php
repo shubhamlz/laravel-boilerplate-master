@@ -77,7 +77,7 @@
                                                 <span class="add btn" id="add-{{$cart->id}}">+</span>
                                             </div>
                                         </td>
-                                        <td clas="perhead-{{$cart->id}}">{{$productInfo->price}}</td>
+                                        <td class="perhead-{{$cart->id}}">{{$productInfo->price}}</td>
                                         <td class="text-center text-lg text-medium" id="amount-{{$cart->id}}">{{$amount}}</td>
                                         <td class="text-center">
                                             <a class="remove-from-cart" href="{{ route('frontend.auth.removeitem', $cart->id) }}" data-toggle="tooltip" title="" data-original-title="Remove item" onclick="event.preventDefault(); if (confirm('Are you sure you want to delete this row?')) document.getElementById('delete-form-{{$cart->id}}').submit();">
@@ -98,7 +98,7 @@
                                 @php
                                     }
                                @endphp
-                                @if (empty($userCart->cart))
+                                @if (empty($userCart))
                                     <tr>
                                         <td colspan="12">
                                             <p class="text-center">Please Add Product To Your Cart</p>
@@ -110,16 +110,19 @@
 
                         </div>
                         <div class="shopping-cart-footer row">
-                            <div class="col-12">
-                                <div class="column text-right">Subtotal: <span class="text-medium" id="total">{{$total}}</span></div>
-                            </div>
+                            <!-- <div class="col-12">
+                                <div class="column text-right">Subtotal: 
+                            </div> -->
                             <div class="col-4">
 
                                 <a class="btn btn-outline-secondary" href="{{route('frontend.index')}}"><i class="icon-arrow-left"></i>&nbsp;Back to Shopping</a>
 
                             </div>
                             <div class="col-8">
-                                <div class="column text-right">&nbsp; &nbsp;<a class="btn btn-success" href="#">Checkout</a></div>
+                                <div class="column text-right">&nbsp; &nbsp;<a class="btn btn-warning" href="{{ route('frontend.auth.placeorder') }}" data-toggle="tooltip" title="" data-original-title="Place Order" onclick="event.preventDefault(); if (confirm('Are you sure you want to Place Order?')) document.getElementById('checkout').submit();">Checkout Process Order By {{count($userCart)}} Items of Rs <span class="text-medium" id="total">{{$total}}</span>.</a></div>
+                                <form id="checkout" action="{{ route('frontend.auth.placeorder') }}" method="POST" style="display: none;">
+                                                @csrf
+                                  </form>
                             </div>
                         </div>
                     </div>
@@ -136,17 +139,19 @@
             var cartid = $(this).attr('id');
     
             cartid = cartid.split('-');
-            var max = $('#quantity-'+cartid[1]).attr('max');
+            var max = $('#quantity-'+cartid[1]).attr('max'); 
 
-            alert(cartid[1]+max);
             var qu = $('#quantity-'+cartid[1]).val();
-          
+            var prqu=$('.perhead-'+cartid[1]).text();
             qu = qu * 1 + 1;
-            
+            var prqu = prqu * 1;
+            var subtotal =prqu * qu;
             if (max >= qu) {
                 $('#quantity-'+cartid[1]).val(qu);
                 $data = {
                     "quantity": qu,
+                    "subtotal":subtotal,
+                    "perhead":prqu,
                     'id': cartid[1],
                     'type':"add",
                     _token: csrfToken
@@ -159,43 +164,49 @@
         $(".sub").click(function() {
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             var cartid = $(this).attr('id');
-            var min = $('#quantity-'+cartid[1]).attr('min');
             cartid = cartid.split('-');
+            var min = $('#quantity-'+cartid[1]).attr('min');
+           
             var qu = $('#quantity-'+cartid[1]).val();
-            qu = qu * 1 - 1
+            var prqu=$('.perhead-'+cartid[1]).text();
+            qu = qu * 1 - 1;
+            var prqu = prqu * 1;
+            var subtotal = prqu * qu;
+            alert(cartid);
             if (min < qu) {
                 $('#quantity-'+cartid[1]).val(qu);
-                $data = {
+                var data = {
                     "quantity": qu,
+                    "subtotal":subtotal,
+                    "perhead":prqu,
                     'id': cartid[1],
                     'type':"sub",
                     _token: csrfToken
                 };
-                updateCart($data, "patch");
+                updateCart(data, "patch");
             }
         });
 
-        function updateCart($data = [], $method) {
+        function updateCart(data = [], $method) {
             $.ajax({
                 type: $method,
                 url: "{{route('frontend.auth.updatecart')}}",
-                data: $data,
+                data: data,
                 success: function(result) {
-                    $data = JSON.parse(result);
-                    $('#amount-' + $data['id']).text($data['total']);
-                    $total= $('#total').text()*1;
-                    $diff =0;
-                    if($data['type']=="add"){
-                        var diff = $data['total']-$total;  
-                        alert($total+"++++"+$data['total']+""+$d);
-                        $total+= $diff;
+                    var data = JSON.parse(result);
+                    console.log(data);
+                    $('#amount-' + data['id']).text(data['total']);
+                    var total= $('#total').text()*1;
+                    var diff = 0;
+                    if(data['type']=="add"){
+                        diff =data['perhead']*1;  
+                        total+= diff;
                     }else{
-                        var diff=$total-$data['total'];  
-                        $total-= $diff;
+                        diff = data['perhead']*1;                   
+                        total= total - diff;
                     }
-                   
-                    // alert($diff );
-                    $('#total').text($total);
+
+                    $('#total').text(total);
                 }
             });
         }

@@ -126,33 +126,27 @@
                                 @method('POST')
                                 <input type="hidden" name="product" value="{{ $prod->id }}">
                             </form>
+                            @if(empty($userCart))
+                            <p>No items in the cart.</p>
+                        @else
+                            @php
+                                $cartProductIds = $userCart->pluck('product_id')->toArray();
+                            @endphp
 
-                            @foreach($userCart as $ascart)
-                         
-                            @if(!empty($ascart->cart))
-                            @if($ascart->cart->product_id === $prod->id)
-                              <a href="{{route('frontend.user.dashboard')}}" class="form-control">Go To Cart</a>
-                            
-                            
-                           @else
-                            <a href="{{ route('frontend.auth.pcart', $prod->id) }}" class="card-link" onclick="event.preventDefault(); document.getElementById('add-cart-{{$prod->id}}').submit(); ">Add To Cart</a>
-                            <form id="add-cart-{{ $prod->id }}" action="{{ route('frontend.auth.pcart', $prod->id) }}" method="POST" style="display: none;">
-                                @csrf
-                                @method('POST')
-                                <input type="hidden" name="product" value="{{ $prod->id }}">
-                            </form>
-                            @endif
+                            @if(in_array($prod->id, $cartProductIds))
+                                <a href="{{ route('frontend.user.dashboard') }}" class="form-control">Go To Cart</a>
                             @else
-                            <a href="{{ route('frontend.auth.pcart', $prod->id) }}" class="card-link" onclick="event.preventDefault(); document.getElementById('add-cart-{{$prod->id}}').submit(); ">Add To Cart</a>
-                            <form id="add-cart-{{ $prod->id }}" action="{{ route('frontend.auth.pcart', $prod->id) }}" method="POST" style="display: none;">
-                                @csrf
-                                @method('POST')
-                                <input type="hidden" name="product" value="{{ $prod->id }}">
-                            </form>
+                                <a href="{{ route('frontend.auth.pcart', $prod->id) }}" class="card-link" onclick="event.preventDefault(); document.getElementById('add-cart-{{ $prod->id }}').submit();">Add To Cart</a>
+                                <form id="add-cart-{{ $prod->id }}" action="{{ route('frontend.auth.pcart', $prod->id) }}" method="POST" style="display: none;">
+                                    @csrf
+                                    @method('POST')
+                                    <input type="hidden" name="product" value="{{ $prod->id }}">
+                                </form>
                             @endif
-                            @endforeach
+                        @endif
+   
                         </div>
-                        </div>
+                    </div>
                     @endforeach
                 </div>
                 @endif

@@ -31,7 +31,7 @@ Route::group(['as' => 'auth.'], function () {
         Route::delete('removeitem/{id}',[CartController::class,'destroy'])->name('removeitem');
         Route::delete('removecart/{userid}',[CartController::class,'removecart'])->name('removecart');
 
-
+        Route::post('placeorder',[OrderController::class,'create'])->name('placeorder');
         //Appointment form 
         Route::get('appointment',[AppointmentController::class,'index'])->name('appointment');
         Route::post('appointment/create',[AppointmentController::class,'create'])->name('appointment.create');

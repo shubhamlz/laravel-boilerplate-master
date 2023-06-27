@@ -63,18 +63,20 @@ class CartController
 
     public function update(UpdateCartRequest $request)
     {
+        // dd($request->all());
         $id = $request->id;
         $type =$request->type;
-        $quantity =$request->quantity;
-
+        $quantity = $request->quantity;
+        $subtotal = $request->subtotal;
+        $amount = $request->perhead;
        $userCart = $this->cartService->update($request->validated());
+       
+    //    $user =Auth::user()->id;
+    //    $userCart = Cart::Where('id',$id)->get()->toArray();
+    // //    dd($userCart[0]['product_id']);
+    //    $userProduct = Product::with('cart')->Where('id',$userCart[0]['product_id'])->get()->toArray();
 
-       $user =Auth::user()->id;
-       $userCart = Cart::Where('id',$id)->get()->toArray();
-    //    dd($userCart[0]['product_id']);
-       $userProduct = Product::with('cart')->Where('id',$userCart[0]['product_id'])->get()->toArray();
-
-       $data=['total'=> $userProduct[0]['price']* $quantity,'id'=>$id,'type'=>$type];
+       $data=['total'=> $subtotal,"perhead"=>$amount,'id'=>$id,'type'=>$type];
        
        return json_encode($data); die();
        //return view('frontend.user.dashboard',compact('userProduct','userCart'));

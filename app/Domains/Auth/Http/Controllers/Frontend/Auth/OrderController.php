@@ -3,9 +3,10 @@
 namespace App\Domains\Auth\Http\Controllers\Frontend\Auth;
 
 use App\Domains\Auth\Models\Order;
+use App\Domains\Auth\Models\Cart;
 use App\Domains\Auth\Services\OrderService;
-
-
+use Illuminate\Support\Facades\Auth;
+use App\Domains\Auth\Http\Requests\Frontend\Order\StoreOrderRequest;
 /**
  * Class UserController.
  */
@@ -26,15 +27,20 @@ class OrderController
      */
     public function index()
     {
-        return view('frontend.auth.appointment.index');
+        return view('frontend.auth.index');
     }
 
     /**
      * @return mixed
      */
-    public function create()
+    public function create(StoreOrderRequest $request)
     {
-        return view('backend.auth.user.create');
+        $userid = Auth::user()->id;
+        // dd($userid);
+        $cart = Cart::where('user_id',$userid)->get()->toArray();
+        // dd($cart);
+        $this->orderService->store($request->validated(),$cart);
+        return view('frontend.auth.checkout');
     }
 
     /**

@@ -20,19 +20,15 @@ class DashboardController
         $userCart = Cart::where('user_id',$user)->get();
         // dd($userCart);
         $productid=[];
-        foreach($userCart as $cartid){
-           
-                $productid[]=$cartid->product_id;
-         
-        }
-        // dd($productid);
+        foreach($userCart as $cartid){          
+                $productid[]=$cartid->product_id;        
+        }   
         if(!empty($userCart) && !empty($productid)){
             $userProduct = Product::with('cart')->whereIn('id',$productid)->get();
         }else{
             $userProduct =[];
         }
-       
-        // dd($productid);
+
         return view('frontend.user.dashboard',compact('userProduct','userCart'));
     }
 }

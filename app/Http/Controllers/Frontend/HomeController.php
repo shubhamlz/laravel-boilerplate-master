@@ -22,7 +22,7 @@ class HomeController
             $userid = Auth::user()->id;
             $product = Product::with('category')->get();
             $category = Category::pluck('cat_name','id');
-            $userCart = User::with('cart')->where('id',$userid)->get();
+            $userCart = Cart::where('user_id',$userid)->get();
             return view('frontend.index',compact('product','category','userCart'));
         }else{
             return view('frontend.index');
